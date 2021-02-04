@@ -6,11 +6,26 @@ import axios from "axios";
 
 const Search = () => {
   const [term, setTerm] = useState("programming");
+  const [
+    debouncedTerm,
+    setDebouncedTerm,
+  ] = useState(term);
   const [results, setResults] = useState([]);
 
-  console.log(results);
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      //When term updates we set timer to update debouncedTerm to term
+      setDebouncedTerm(term);
+    }, 1000);
+
+    //return a cleanup function, when user types we cancel previous timer and set new timer
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [term]);
 
   useEffect(() => {
+    //Make request and search for the term 'debouncedTerm'
     const search = async () => {
       const { data } = await axios.get(
         "https://en.wikipedia.org/w/api.php",
@@ -20,29 +35,37 @@ const Search = () => {
             list: "search",
             origin: "*",
             format: "json",
-            srsearch: term,
+            srsearch: debouncedTerm,
           },
         }
       );
       //Drill down to return the results we want
       setResults(data.query.search);
     };
-
-    //If term has characters inside it the search will run; otherwise you can provide default search content above in term
-    if (term) {
-      search();
-    }
-  }, [term]);
+    search();
+  }, [debouncedTerm]);
 
   const renderedResults = results.map(
     (result) => {
       return (
         <div className="item" key={result.pageid}>
+          <div className="right floated content">
+            <a
+              className="ui button"
+              href={`https://en.wikipedia.org?curid=${result.pageid}`}
+            >
+              Go
+            </a>
+          </div>
           <div className="content">
             <div className="header">
               {result.title}
             </div>
-            {result.snippet}
+            <span
+              dangerouslySetInnerHTML={{
+                __html: result.snippet,
+              }}
+            ></span>
           </div>
         </div>
       );
