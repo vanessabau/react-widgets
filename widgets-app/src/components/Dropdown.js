@@ -5,6 +5,7 @@ import React, {
 } from "react";
 
 const Dropdown = ({
+  label,
   options,
   selected,
   onSelectedChange,
@@ -60,9 +61,7 @@ const Dropdown = ({
   return (
     <div ref={ref} className="ui form">
       <div className="field">
-        <label className="label">
-          Select a color
-        </label>
+        <label className="label">{label}</label>
         <div
           onClick={() => setOpen(!open)}
           className={`ui selection dropdown ${
